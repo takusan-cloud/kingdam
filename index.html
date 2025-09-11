@@ -2,31 +2,50 @@
 <html lang="ja">
 <head>
   <meta charset="utf-8">
-  <title>組み合わせチェック（数字表示＋ハイライト）</title>
+  <title>キングダム頂天　数字合わせ</title>
   <style>
-    table { border-collapse: collapse; margin: 10px 0; }
-    td, th { border: 1px solid #ccc; padding: 4px; width: 50px; text-align: center; }
-    input { width: 100%; box-sizing: border-box; text-align: center; }
-    #result { margin-top: 1em; font-weight: bold; font-size: 1.2em; }
-    .highlight { background-color: #90ee90; } /* 薄い緑でハイライト */
+    body { font-family: sans-serif; margin: 20px; }
+    table { border-collapse: collapse; margin: 10px 0; width: 100%; }
+    td, th { border: 1px solid #ccc; padding: 4px; text-align: center; }
+    input { width: 100%; box-sizing: border-box; text-align: center; font-size: 1em; padding: 4px; }
+    button {
+      padding: 12px 20px;
+      font-size: 1.2em;
+      border-radius: 10px;
+      background: #0078d7;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+    button:hover { background: #005fa3; }
+    #result { margin-top: 1em; font-weight: bold; font-size: 1.3em; text-align: center; }
+    .highlight { background-color: #90ee90; }
+    .confetti {
+      position: fixed;
+      top: -50px;
+      font-size: 2em;
+      animation: fall 3s linear forwards;
+    }
+    @keyframes fall {
+      to { transform: translateY(100vh); opacity: 0; }
+    }
   </style>
 </head>
 <body>
-  <h2>3つの列から組み合わせ計算</h2>
+  <h2>キングダム頂天　数字合わせ</h2>
 
   <label>ターゲット値: <input id="target" type="number" value="100"></label>
   <button onclick="checkCombinations()">チェック</button>
 
-  <h3>数値入力</h3>
+  <h3>メンバー入力</h3>
   <table>
-    <tr><th>A</th><th>B</th><th>C</th></tr>
-    <!-- 1〜10行 -->
+    <tr><th>A 名前</th><th>A 数字</th><th>B 名前</th><th>B 数字</th><th>C 名前</th><th>C 数字</th></tr>
     <script>
       for(let i=1;i<=10;i++){
         document.write('<tr>'+
-          `<td><input id="A${i}" type="number"></td>`+
-          `<td><input id="B${i}" type="number"></td>`+
-          `<td><input id="C${i}" type="number"></td>`+
+          `<td><input id="Aname${i}" type="text"></td><td><input id="A${i}" type="number"></td>`+
+          `<td><input id="Bname${i}" type="text"></td><td><input id="B${i}" type="number"></td>`+
+          `<td><input id="Cname${i}" type="text"></td><td><input id="C${i}" type="number"></td>`+
         '</tr>');
       }
     </script>
@@ -40,8 +59,9 @@ function getValue(id){
   const val = Number(document.getElementById(id).value);
   return isNaN(val) ? 0 : val;
 }
-
-// 入力セルからハイライトを全部外す
+function getName(id){
+  return document.getElementById(id).value || "？？";
+}
 function clearHighlights(){
   document.querySelectorAll("input").forEach(el=> el.classList.remove("highlight"));
 }
@@ -55,13 +75,11 @@ function checkCombinations(){
     for(let b=1;b<=10 && !found;b++){
       for(let c=1;c<=10 && !found;c++){
         const idA = "A"+a, idB = "B"+b, idC = "C"+c;
-        const valA = getValue(idA);
-        const valB = getValue(idB);
-        const valC = getValue(idC);
+        const idAn = "Aname"+a, idBn = "Bname"+b, idCn = "Cname"+c;
+        const valA = getValue(idA), valB = getValue(idB), valC = getValue(idC);
         const sum = valA + valB + valC;
-
         if(sum === target){
-          found = { idA, idB, idC, valA, valB, valC, sum };
+          found = { idA, idB, idC, idAn, idBn, idCn, valA, valB, valC, sum };
         }
       }
     }
@@ -69,10 +87,9 @@ function checkCombinations(){
 
   const resDiv = document.getElementById('result');
   if(found){
-    resDiv.textContent = `クリア！ ${found.valA} + ${found.valB} + ${found.valC} = ${found.sum}`;
+    const nameA = getName(found.idAn), nameB = getName(found.idBn), nameC = getName(found.idCn);
+    resDiv.textContent = `🎉 クリア！ ${nameA}(${found.valA}) + ${nameB}(${found.valB}) + ${nameC}(${found.valC}) = ${found.sum}`;
     resDiv.style.color = "green";
-
-    // 該当セルをハイライト
     document.getElementById(found.idA).classList.add("highlight");
     document.getElementById(found.idB).classList.add("highlight");
     document.getElementById(found.idC).classList.add("highlight");
