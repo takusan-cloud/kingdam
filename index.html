@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <title>組み合わせチェック（数字表示＋ハイライト）</title>
+  <style>
+    table { border-collapse: collapse; margin: 10px 0; }
+    td, th { border: 1px solid #ccc; padding: 4px; width: 50px; text-align: center; }
+    input { width: 100%; box-sizing: border-box; text-align: center; }
+    #result { margin-top: 1em; font-weight: bold; font-size: 1.2em; }
+    .highlight { background-color: #90ee90; } /* 薄い緑でハイライト */
+  </style>
+</head>
+<body>
+  <h2>3つの列から組み合わせ計算</h2>
+
+  <label>ターゲット値: <input id="target" type="number" value="100"></label>
+  <button onclick="checkCombinations()">チェック</button>
+
+  <h3>数値入力</h3>
+  <table>
+    <tr><th>A</th><th>B</th><th>C</th></tr>
+    <!-- 1〜10行 -->
+    <script>
+      for(let i=1;i<=10;i++){
+        document.write('<tr>'+
+          `<td><input id="A${i}" type="number"></td>`+
+          `<td><input id="B${i}" type="number"></td>`+
+          `<td><input id="C${i}" type="number"></td>`+
+        '</tr>');
+      }
+    </script>
+  </table>
+
+  <h3>結果</h3>
+  <div id="result"></div>
+
+<script>
+function getValue(id){
+  const val = Number(document.getElementById(id).value);
+  return isNaN(val) ? 0 : val;
+}
+
+// 入力セルからハイライトを全部外す
+function clearHighlights(){
+  document.querySelectorAll("input").forEach(el=> el.classList.remove("highlight"));
+}
+
+function checkCombinations(){
+  clearHighlights();
+  const target = Number(document.getElementById('target').value);
+  let found = null;
+
+  for(let a=1;a<=10 && !found;a++){
+    for(let b=1;b<=10 && !found;b++){
+      for(let c=1;c<=10 && !found;c++){
+        const idA = "A"+a, idB = "B"+b, idC = "C"+c;
+        const valA = getValue(idA);
+        const valB = getValue(idB);
+        const valC = getValue(idC);
+        const sum = valA + valB + valC;
+
+        if(sum === target){
+          found = { idA, idB, idC, valA, valB, valC, sum };
+        }
+      }
+    }
+  }
+
+  const resDiv = document.getElementById('result');
+  if(found){
+    resDiv.textContent = `クリア！ ${found.valA} + ${found.valB} + ${found.valC} = ${found.sum}`;
+    resDiv.style.color = "green";
+
+    // 該当セルをハイライト
+    document.getElementById(found.idA).classList.add("highlight");
+    document.getElementById(found.idB).classList.add("highlight");
+    document.getElementById(found.idC).classList.add("highlight");
+  } else {
+    resDiv.textContent = "クリアできる組み合わせはありません。";
+    resDiv.style.color = "red";
+  }
+}
+</script>
+</body>
+</html>
