@@ -7,35 +7,43 @@
     body { font-family: sans-serif; margin: 20px; }
     table { border-collapse: collapse; margin: 10px 0; width: 100%; }
     td, th { border: 1px solid #ccc; padding: 4px; text-align: center; }
-    input { width: 100%; box-sizing: border-box; text-align: center; font-size: 1em; padding: 4px; }
+    input, select { font-size: 1em; padding: 4px; }
     button {
       padding: 12px 20px;
-      font-size: 1.2em;
+      font-size: 1.1em;
       border-radius: 10px;
       background: #0078d7;
       color: white;
       border: none;
       cursor: pointer;
+      margin: 4px;
     }
     button:hover { background: #005fa3; }
     #result { margin-top: 1em; font-weight: bold; font-size: 1.3em; text-align: center; }
     .highlight { background-color: #90ee90; }
-    .confetti {
-      position: fixed;
-      top: -50px;
-      font-size: 2em;
-      animation: fall 3s linear forwards;
-    }
-    @keyframes fall {
-      to { transform: translateY(100vh); opacity: 0; }
-    }
   </style>
 </head>
 <body>
   <h2>キングダム頂天　数字合わせ</h2>
 
-  <label>ターゲット値: <input id="target" type="number" value="100"></label>
+  <h3>戦力入力</h3>
+  <label>表示したい戦力: <input id="totalPower" type="number" oninput="updateTarget()"></label><br>
+  <label>７体設置の戦力: <input id="usedPower" type="number" oninput="updateTarget()"></label><br>
+  <label>ターゲット値: <input id="target" type="number" readonly></label><br>
+
+  <h3>推しキャラ</h3>
+  <label>推しキャラを選択:
+    <select id="oshi">
+      <option value="sawa">澤</option>
+      <option value="heki">壁</option>
+      <option value="kyoukai">羌瘣</option>
+      <option value="mouten">蒙恬</option>
+    </select>
+  </label>
+
+  <br><br>
   <button onclick="checkCombinations()">チェック</button>
+  <button onclick="resetInputs()">リセット</button>
 
   <h3>メンバー入力</h3>
   <table>
@@ -43,9 +51,9 @@
     <script>
       for(let i=1;i<=10;i++){
         document.write('<tr>'+
-          `<td><input id="Aname${i}" type="text"></td><td><input id="A${i}" type="number"></td>`+
-          `<td><input id="Bname${i}" type="text"></td><td><input id="B${i}" type="number"></td>`+
-          `<td><input id="Cname${i}" type="text"></td><td><input id="C${i}" type="number"></td>`+
+          `<td><input id="Aname${i}" type="text" ${i>1 ? 'disabled' : ''}></td><td><input id="A${i}" type="number"></td>`+
+          `<td><input id="Bname${i}" type="text" ${i>1 ? 'disabled' : ''}></td><td><input id="B${i}" type="number"></td>`+
+          `<td><input id="Cname${i}" type="text" ${i>1 ? 'disabled' : ''}></td><td><input id="C${i}" type="number"></td>`+
         '</tr>');
       }
     </script>
@@ -55,17 +63,53 @@
   <div id="result"></div>
 
 <script>
+// 🔹 キャラごとのセリフ
+const serifs = {
+  sawa: [
+    "私の伍は今まで一人も死んでいません",
+    "弱者には弱者の戦い方があります",
+    "これは卑怯ではなく戦法です"
+  ],
+  heki: [
+    "頭を冷やせ馬鹿者っ",
+    "盾を投げられた意味がわからなかったのか！！",
+    "私同様この軍には派手さはない だがあらゆる基本戦術は何百回と繰り返した"
+  ],
+  kyoukai: [
+    "･･･やっぱり大バカだなお前",
+    "私も将軍を目指すぞ　信",
+    "舞うぞ緑穂"
+  ],
+  mouten: [
+    "もっと気楽に行こーよ　先は長いんだし",
+    "ありがとう　じーちゃん",
+    "やれるのは楽華隊だけ、だからやる"
+  ]
+};
+
+// 🔹 値の取得
 function getValue(id){
   const val = Number(document.getElementById(id).value);
   return isNaN(val) ? 0 : val;
 }
-function getName(id){
-  return document.getElementById(id).value || "？？";
+function getName(prefix){
+  return document.getElementById(prefix+"name1").value || "？？";
 }
+
+// 🔹 ハイライトクリア
 function clearHighlights(){
   document.querySelectorAll("input").forEach(el=> el.classList.remove("highlight"));
 }
 
+// 🔹 ターゲット更新
+function updateTarget(){
+  const total = getValue("totalPower");
+  const used = getValue("usedPower");
+  document.getElementById("target").value = total - used;
+  saveData();
+}
+
+// 🔹 計算チェック
 function checkCombinations(){
   clearHighlights();
   const target = Number(document.getElementById('target').value);
@@ -75,11 +119,10 @@ function checkCombinations(){
     for(let b=1;b<=10 && !found;b++){
       for(let c=1;c<=10 && !found;c++){
         const idA = "A"+a, idB = "B"+b, idC = "C"+c;
-        const idAn = "Aname"+a, idBn = "Bname"+b, idCn = "Cname"+c;
         const valA = getValue(idA), valB = getValue(idB), valC = getValue(idC);
         const sum = valA + valB + valC;
         if(sum === target){
-          found = { idA, idB, idC, idAn, idBn, idCn, valA, valB, valC, sum };
+          found = { idA, idB, idC, valA, valB, valC, sum };
         }
       }
     }
@@ -87,17 +130,67 @@ function checkCombinations(){
 
   const resDiv = document.getElementById('result');
   if(found){
-    const nameA = getName(found.idAn), nameB = getName(found.idBn), nameC = getName(found.idCn);
-    resDiv.textContent = `🎉 クリア！ ${nameA}(${found.valA}) + ${nameB}(${found.valB}) + ${nameC}(${found.valC}) = ${found.sum}`;
+    const nameA = getName("A"), nameB = getName("B"), nameC = getName("C");
+    const oshiKey = document.getElementById("oshi").value;
+    const oshiName = document.querySelector(`#oshi option[value="${oshiKey}"]`).textContent;
+    const lines = serifs[oshiKey];
+    const line = lines[Math.floor(Math.random()*lines.length)];
+
+    resDiv.textContent = `🎉 ${oshiName}「${line}」 (${nameA}(${found.valA}) + ${nameB}(${found.valB}) + ${nameC}(${found.valC}) = ${found.sum})`;
     resDiv.style.color = "green";
     document.getElementById(found.idA).classList.add("highlight");
     document.getElementById(found.idB).classList.add("highlight");
     document.getElementById(found.idC).classList.add("highlight");
   } else {
-    resDiv.textContent = "クリアできる組み合わせはありません。";
+    resDiv.textContent = "組み合わせは見つかりませんでした。";
     resDiv.style.color = "red";
   }
+  saveData();
 }
+
+// 🔹 入力保存
+function saveData(){
+  let data = {
+    total: document.getElementById("totalPower").value,
+    used: document.getElementById("usedPower").value,
+    oshi: document.getElementById("oshi").value
+  };
+  ["A","B","C"].forEach(col=>{
+    data[col+"name"] = document.getElementById(col+"name1").value;
+    for(let i=1;i<=10;i++){
+      data[col+i] = document.getElementById(col+i).value;
+    }
+  });
+  localStorage.setItem("kingdomTool", JSON.stringify(data));
+}
+
+// 🔹 入力復元
+function loadData(){
+  const saved = localStorage.getItem("kingdomTool");
+  if(saved){
+    const data = JSON.parse(saved);
+    document.getElementById("totalPower").value = data.total || "";
+    document.getElementById("usedPower").value = data.used || "";
+    document.getElementById("oshi").value = data.oshi || "sawa";
+    ["A","B","C"].forEach(col=>{
+      document.getElementById(col+"name1").value = data[col+"name"] || "";
+      for(let i=1;i<=10;i++){
+        document.getElementById(col+i).value = data[col+i] || "";
+      }
+    });
+    updateTarget();
+  }
+}
+
+// 🔹 リセット
+function resetInputs(){
+  localStorage.removeItem("kingdomTool");
+  document.querySelectorAll("input").forEach(el=> { el.value=""; });
+  document.getElementById("result").textContent = "";
+}
+
+// 初期ロード
+window.onload = loadData;
 </script>
 </body>
 </html>
