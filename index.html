@@ -19,6 +19,7 @@
     color: #ff0000;
     text-shadow: 3px 3px 0 #000, 6px 6px 0 #ffd700;
     margin: 10px 0 0 0;
+    text-align: center;
   }
   #controls {
     display: flex;
@@ -26,6 +27,8 @@
     align-items: flex-start;
     margin: 10px 0;
     gap: 5px;
+    width: 100%;
+    max-width: 400px;
   }
   .btn {
     padding: 6px 12px;
@@ -45,7 +48,10 @@
   }
   .container {
     display: flex;
+    flex-wrap: wrap;
     gap: 20px;
+    justify-content: center;
+    max-width: 100%;
   }
   .busho-block {
     background: rgba(0,0,0,0.6);
@@ -54,6 +60,7 @@
     display: flex;
     flex-direction: column;
     align-items: center;
+    min-width: 150px;
   }
   .busho-name {
     text-align: center;
@@ -68,6 +75,33 @@
   .highlight {
     background: yellow;
     border: 2px solid red;
+  }
+
+  /* --- スマホ対応 --- */
+  @media screen and (max-width: 768px) {
+    h1 {
+      font-size: 2rem;
+      text-shadow: 2px 2px 0 #000, 4px 4px 0 #ffd700;
+    }
+    .container {
+      flex-direction: column;
+      gap: 10px;
+      align-items: center;
+    }
+    .busho-block {
+      width: 90%;
+      max-width: 300px;
+    }
+    .power-input {
+      width: 100%;
+    }
+    #controls {
+      align-items: center;
+      max-width: none;
+    }
+    #serif {
+      font-size: 2rem; /* スマホ時は少し大きめ */
+    }
   }
 </style>
 </head>
@@ -98,8 +132,8 @@ function createBushoBlock(index) {
   block.className = "busho-block";
   block.innerHTML = `
     <div class="busho-name">武将${index+1}</div>
-    <input class="busho-input busho-name-input" placeholder="名前">
-    ${Array(10).fill('').map(() => `<input class="power-input" placeholder="戦力">`).join('')}
+    <input class="busho-input busho-name-input" placeholder="">
+    ${Array(10).fill('').map(() => `<input type="number" class="power-input" placeholder="戦力">`).join('')}
   `;
   return block;
 }
@@ -109,7 +143,7 @@ function renderBushoBlocks() {
   for (let i = 0; i < bushoCount; i++) {
     container.appendChild(createBushoBlock(i));
   }
-  loadData(); // ブロック再生成後に復元
+  loadData();
 }
 
 addBtn.addEventListener("click", () => {
@@ -124,18 +158,17 @@ removeBtn.addEventListener("click", () => {
   renderBushoBlocks();
 });
 
-// 総当たり計算
 function checkCombination() {
+  document.querySelectorAll('.power-input').forEach(el => el.classList.remove('highlight'));
   const allInputs = [...document.querySelectorAll('.busho-block')].map(block => {
     const name = block.querySelector('.busho-name-input').value.trim();
     const powers = [...block.querySelectorAll('.power-input')].map(i => parseInt(i.value.replace(/,/g,'')) || 0);
     return { name, powers, block };
   });
 
-  const target = 10000; // ←ここは必要なら表示したい戦力欄から取得
+  const target = 10000; // 必要なら外部入力欄に変更可能
   let found = false;
 
-  // 総当たり（bushoCountに応じて）
   const combinations = getCombinations(allInputs, bushoCount);
   combinations.some(combo => {
     const sum = combo.reduce((acc, b) => acc + (b.powers[0] || 0), 0);
@@ -169,15 +202,12 @@ function getCombinations(arr, k) {
   return results;
 }
 
-// セリフ3つからランダム
 function getRandomSerif() {
-  const list = ["おお！やったぞ！","ふぉおおおお！","勝利は目前だ！"];
+  const list = ["私の伍は今まで一人も死んでいません","弱者には弱者の戦い方があります","これは卑怯ではなく戦法です"];
   return list[Math.floor(Math.random()*list.length)];
 }
 
 document.getElementById("checkBtn").addEventListener("click", checkCombination);
-
-// --- ローカルストレージ保存 ---
 document.getElementById("saveBtn").addEventListener("click", saveData);
 
 function saveData() {
