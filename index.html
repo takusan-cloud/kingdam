@@ -76,7 +76,12 @@
     background: yellow;
     border: 2px solid red;
   }
-
+  #targetInput {
+    width: 150px;
+    margin-bottom: 5px;
+    text-align: right;
+    font-size: 1rem;
+  }
   /* --- スマホ対応 --- */
   @media screen and (max-width: 768px) {
     h1 {
@@ -92,7 +97,7 @@
       width: 90%;
       max-width: 300px;
     }
-    .power-input {
+    .power-input, #targetInput {
       width: 100%;
     }
     #controls {
@@ -100,7 +105,7 @@
       max-width: none;
     }
     #serif {
-      font-size: 2rem; /* スマホ時は少し大きめ */
+      font-size: 2rem;
     }
   }
 </style>
@@ -109,6 +114,7 @@
   <h1>キングダム頂天 数字合わせ</h1>
 
   <div id="controls">
+    <input id="targetInput" type="number" placeholder="目標戦力（例: 400000000）">
     <button id="checkBtn" class="btn">チェック</button>
     <button id="addBtn" class="btn">＋武将追加</button>
     <button id="removeBtn" class="btn" style="display:none;">−武将削除</button>
@@ -126,6 +132,7 @@ const container = document.getElementById("bushoContainer");
 const serifDiv = document.getElementById("serif");
 const addBtn = document.getElementById("addBtn");
 const removeBtn = document.getElementById("removeBtn");
+const targetInput = document.getElementById("targetInput");
 
 function createBushoBlock(index) {
   const block = document.createElement("div");
@@ -166,7 +173,7 @@ function checkCombination() {
     return { name, powers, block };
   });
 
-  const target = 10000; // 必要なら外部入力欄に変更可能
+  const target = parseInt(targetInput.value.replace(/,/g,'')) || 0;
   let found = false;
 
   const combinations = getCombinations(allInputs, bushoCount);
@@ -217,7 +224,7 @@ function saveData() {
     const powers = [...block.querySelectorAll('.power-input')].map(i => i.value);
     data.push({ name, powers });
   });
-  localStorage.setItem("kingdomData", JSON.stringify({ bushoCount, data }));
+  localStorage.setItem("kingdomData", JSON.stringify({ bushoCount, data, target: targetInput.value }));
 }
 
 function loadData() {
@@ -225,6 +232,7 @@ function loadData() {
   if (!saved) return;
   const parsed = JSON.parse(saved);
   bushoCount = parsed.bushoCount;
+  targetInput.value = parsed.target || "";
   parsed.data.forEach((b, i) => {
     const block = document.querySelectorAll('.busho-block')[i];
     if (!block) return;
