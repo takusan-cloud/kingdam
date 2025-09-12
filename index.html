@@ -1,256 +1,212 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-  <meta charset="UTF-8">
-  <title>キングダム頂天 数字合わせ</title>
-  <style>
-    body {
-      margin: 0;
-      font-family: "Yu Gothic", "Hiragino Kaku Gothic Pro", sans-serif;
-      background: url("bg.jpg") no-repeat center top;
-      background-size: cover;
-      color: white;
-      text-align: center;
-    }
-    h1 {
-      font-size: 3em;
-      color: #b60000;
-      text-shadow: 3px 3px 0 #000, 6px 6px 0 #ffd700;
-      margin-top: 10px;
-    }
-    .container {
-      display: flex;
-      justify-content: flex-start;
-      gap: 20px;
-      flex-wrap: wrap;
-      padding: 20px;
-    }
-    .section {
-      background: rgba(0,0,0,0.7);
-      padding: 10px;
-      border-radius: 10px;
-    }
-    .section h2 {
-      background: white;
-      color: black;
-      padding: 5px;
-      border-radius: 5px;
-      margin-bottom: 10px;
-      font-size: 1em;
-    }
-    input {
-      margin: 3px;
-      padding: 5px;
-      width: 110px;
-      text-align: right;
-    }
-    .check-btn {
-      display: block;
-      margin: 10px 0;
-      padding: 12px 25px;
-      font-size: 1.3em;
-      background: white;
-      color: black;
-      border: none;
-      border-radius: 8px;
-      cursor: pointer;
-      text-align: left;
-    }
-    .add-btn, .remove-btn {
-      display: block;
-      margin: 10px 0;
-      padding: 5px 15px;
-      font-size: 0.9em;
-      background: white;
-      color: black;
-      border: none;
-      border-radius: 6px;
-      cursor: pointer;
-      text-align: left;
-    }
-    .highlight {
-      border: 3px solid red;
-      background: yellow;
-    }
-    #result {
-      font-size: 2em;
-      font-weight: bold;
-      margin-top: 10px;
-    }
-    .member-group {
-      display: inline-block;
-      margin: 0 20px;
-    }
-    .member-group input {
-      display: block;
-      margin: 3px auto;
-    }
-    .left-controls {
-      text-align: left;
-      padding-left: 20px;
-    }
-  </style>
+<meta charset="UTF-8">
+<title>キングダム頂天 数字合わせ</title>
+<style>
+  body {
+    background: url("bg.jpg") no-repeat center center/cover;
+    margin: 0;
+    color: white;
+    font-family: "Arial", sans-serif;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  h1 {
+    font-size: 3rem;
+    font-weight: bold;
+    color: #ff0000;
+    text-shadow: 3px 3px 0 #000, 6px 6px 0 #ffd700;
+    margin: 10px 0 0 0;
+  }
+  #controls {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    margin: 10px 0;
+    gap: 5px;
+  }
+  .btn {
+    padding: 6px 12px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 1rem;
+  }
+  #checkBtn { background: white; color: black; font-weight: bold; }
+  #addBtn, #removeBtn { background: #ddd; color: black; }
+  #serif {
+    font-size: 1.6rem;
+    font-weight: bold;
+    color: white;
+    margin: 5px 0 10px 0;
+    text-align: center;
+  }
+  .container {
+    display: flex;
+    gap: 20px;
+  }
+  .busho-block {
+    background: rgba(0,0,0,0.6);
+    padding: 10px;
+    border-radius: 10px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  .busho-name {
+    text-align: center;
+    font-weight: bold;
+    margin-bottom: 5px;
+  }
+  .power-input {
+    width: 90px;
+    margin: 2px 0;
+    text-align: right;
+  }
+  .highlight {
+    background: yellow;
+    border: 2px solid red;
+  }
+</style>
 </head>
 <body>
   <h1>キングダム頂天 数字合わせ</h1>
 
-  <div class="container">
-    <div class="section">
-      <h2>戦力入力</h2>
-      <label>表示したい戦力<br>
-        <input id="targetPower" type="text" placeholder="400000000">
-      </label><br>
-      <label>配置済みの戦力<br>
-        <input id="placedPower" type="text" placeholder="300000000">
-      </label>
-    </div>
+  <div id="controls">
+    <button id="checkBtn" class="btn">チェック</button>
+    <button id="addBtn" class="btn">＋武将追加</button>
+    <button id="removeBtn" class="btn" style="display:none;">−武将削除</button>
+    <button id="saveBtn" class="btn" style="background:#555;color:white;">データ保存</button>
   </div>
 
-  <!-- 澤さんのセリフ -->
-  <div id="result">一致なし</div>
+  <div id="serif">一致なし</div>
 
-  <!-- 左寄せボタン群 -->
-  <div class="left-controls">
-    <button class="check-btn" onclick="checkCombination()">チェック</button>
-    <button class="add-btn" onclick="addMember()">+武将追加</button>
-    <button class="remove-btn" onclick="removeMember()" style="display:none;">−武将削除</button>
-  </div>
+  <div class="container" id="bushoContainer"></div>
 
-  <!-- メンバー入力 -->
-  <div class="container" id="members">
-    <div class="section member-group" id="member1">
-      <h2>武将1</h2>
-      <input type="text" placeholder="名前" class="nameInput"><br>
-      <input type="text" placeholder="戦力" class="powerInput">
-      <input type="text" placeholder="戦力" class="powerInput">
-      <input type="text" placeholder="戦力" class="powerInput">
-      <input type="text" placeholder="戦力" class="powerInput">
-      <input type="text" placeholder="戦力" class="powerInput">
-      <input type="text" placeholder="戦力" class="powerInput">
-      <input type="text" placeholder="戦力" class="powerInput">
-      <input type="text" placeholder="戦力" class="powerInput">
-      <input type="text" placeholder="戦力" class="powerInput">
-      <input type="text" placeholder="戦力" class="powerInput">
-    </div>
-    <div class="section member-group" id="member2">
-      <h2>武将2</h2>
-      <input type="text" placeholder="名前" class="nameInput"><br>
-      <input type="text" placeholder="戦力" class="powerInput">
-      <input type="text" placeholder="戦力" class="powerInput">
-      <input type="text" placeholder="戦力" class="powerInput">
-      <input type="text" placeholder="戦力" class="powerInput">
-      <input type="text" placeholder="戦力" class="powerInput">
-      <input type="text" placeholder="戦力" class="powerInput">
-      <input type="text" placeholder="戦力" class="powerInput">
-      <input type="text" placeholder="戦力" class="powerInput">
-      <input type="text" placeholder="戦力" class="powerInput">
-      <input type="text" placeholder="戦力" class="powerInput">
-    </div>
-    <div class="section member-group" id="member3">
-      <h2>武将3</h2>
-      <input type="text" placeholder="名前" class="nameInput"><br>
-      <input type="text" placeholder="戦力" class="powerInput">
-      <input type="text" placeholder="戦力" class="powerInput">
-      <input type="text" placeholder="戦力" class="powerInput">
-      <input type="text" placeholder="戦力" class="powerInput">
-      <input type="text" placeholder="戦力" class="powerInput">
-      <input type="text" placeholder="戦力" class="powerInput">
-      <input type="text" placeholder="戦力" class="powerInput">
-      <input type="text" placeholder="戦力" class="powerInput">
-      <input type="text" placeholder="戦力" class="powerInput">
-      <input type="text" placeholder="戦力" class="powerInput">
-    </div>
-  </div>
+<script>
+let bushoCount = 3;
+const maxBusho = 4;
+const container = document.getElementById("bushoContainer");
+const serifDiv = document.getElementById("serif");
+const addBtn = document.getElementById("addBtn");
+const removeBtn = document.getElementById("removeBtn");
 
-  <script>
-    let memberCount = 3;
-    const maxMembers = 4;
+function createBushoBlock(index) {
+  const block = document.createElement("div");
+  block.className = "busho-block";
+  block.innerHTML = `
+    <div class="busho-name">武将${index+1}</div>
+    <input class="busho-input busho-name-input" placeholder="名前">
+    ${Array(10).fill('').map(() => `<input class="power-input" placeholder="戦力">`).join('')}
+  `;
+  return block;
+}
 
-    const sawaSerifu = [
-      "私の伍は今まで一人も死んでいません",
-      "弱者には弱者の戦い方があります",
-      "これは卑怯ではなく戦法です"
-    ];
+function renderBushoBlocks() {
+  container.innerHTML = "";
+  for (let i = 0; i < bushoCount; i++) {
+    container.appendChild(createBushoBlock(i));
+  }
+  loadData(); // ブロック再生成後に復元
+}
 
-    // カンマ区切り表示
-    function formatNumber(input) {
-      let value = input.value.replace(/,/g, "");
-      if (value === "" || isNaN(value)) return;
-      input.value = Number(value).toLocaleString();
+addBtn.addEventListener("click", () => {
+  if (bushoCount < maxBusho) bushoCount++;
+  if (bushoCount === maxBusho) { addBtn.style.display = "none"; removeBtn.style.display = "block"; }
+  renderBushoBlocks();
+});
+
+removeBtn.addEventListener("click", () => {
+  if (bushoCount > 3) bushoCount--;
+  if (bushoCount < maxBusho) { addBtn.style.display = "block"; removeBtn.style.display = "none"; }
+  renderBushoBlocks();
+});
+
+// 総当たり計算
+function checkCombination() {
+  const allInputs = [...document.querySelectorAll('.busho-block')].map(block => {
+    const name = block.querySelector('.busho-name-input').value.trim();
+    const powers = [...block.querySelectorAll('.power-input')].map(i => parseInt(i.value.replace(/,/g,'')) || 0);
+    return { name, powers, block };
+  });
+
+  const target = 10000; // ←ここは必要なら表示したい戦力欄から取得
+  let found = false;
+
+  // 総当たり（bushoCountに応じて）
+  const combinations = getCombinations(allInputs, bushoCount);
+  combinations.some(combo => {
+    const sum = combo.reduce((acc, b) => acc + (b.powers[0] || 0), 0);
+    if (sum === target) {
+      combo.forEach(b => b.block.querySelectorAll('.power-input')[0].classList.add('highlight'));
+      serifDiv.textContent = getRandomSerif();
+      serifDiv.style.color = "red";
+      found = true;
+      return true;
     }
-    document.addEventListener("input", e => {
-      if (e.target.classList.contains("powerInput") || e.target.id === "targetPower" || e.target.id === "placedPower") {
-        formatNumber(e.target);
-      }
+  });
+
+  if (!found) {
+    serifDiv.textContent = "一致なし";
+    serifDiv.style.color = "white";
+  }
+}
+
+function getCombinations(arr, k) {
+  const results = [];
+  function helper(start, combo) {
+    if (combo.length === k) {
+      results.push(combo);
+      return;
+    }
+    for (let i = start; i < arr.length; i++) {
+      helper(i+1, [...combo, arr[i]]);
+    }
+  }
+  helper(0, []);
+  return results;
+}
+
+// セリフ3つからランダム
+function getRandomSerif() {
+  const list = ["おお！やったぞ！","ふぉおおおお！","勝利は目前だ！"];
+  return list[Math.floor(Math.random()*list.length)];
+}
+
+document.getElementById("checkBtn").addEventListener("click", checkCombination);
+
+// --- ローカルストレージ保存 ---
+document.getElementById("saveBtn").addEventListener("click", saveData);
+
+function saveData() {
+  const data = [];
+  document.querySelectorAll('.busho-block').forEach(block => {
+    const name = block.querySelector('.busho-name-input').value;
+    const powers = [...block.querySelectorAll('.power-input')].map(i => i.value);
+    data.push({ name, powers });
+  });
+  localStorage.setItem("kingdomData", JSON.stringify({ bushoCount, data }));
+}
+
+function loadData() {
+  const saved = localStorage.getItem("kingdomData");
+  if (!saved) return;
+  const parsed = JSON.parse(saved);
+  bushoCount = parsed.bushoCount;
+  parsed.data.forEach((b, i) => {
+    const block = document.querySelectorAll('.busho-block')[i];
+    if (!block) return;
+    block.querySelector('.busho-name-input').value = b.name;
+    block.querySelectorAll('.power-input').forEach((input, idx) => {
+      input.value = b.powers[idx] || "";
     });
+  });
+  if (bushoCount === maxBusho) { addBtn.style.display = "none"; removeBtn.style.display = "block"; }
+}
 
-    function addMember() {
-      if (memberCount >= maxMembers) return;
-      memberCount++;
-      const membersDiv = document.getElementById("members");
-      const newDiv = document.createElement("div");
-      newDiv.className = "section member-group";
-      newDiv.id = "member" + memberCount;
-      newDiv.innerHTML = `
-        <h2>武将${memberCount}</h2>
-        <input type="text" placeholder="名前" class="nameInput"><br>
-        ${'<input type="text" placeholder="戦力" class="powerInput">'.repeat(10)}
-      `;
-      membersDiv.appendChild(newDiv);
-
-      if (memberCount === maxMembers) {
-        document.querySelector(".add-btn").style.display = "none";
-        document.querySelector(".remove-btn").style.display = "inline-block";
-      }
-    }
-
-    function removeMember() {
-      if (memberCount <= 3) return;
-      document.getElementById("member" + memberCount).remove();
-      memberCount--;
-      if (memberCount < maxMembers) {
-        document.querySelector(".add-btn").style.display = "inline-block";
-        document.querySelector(".remove-btn").style.display = "none";
-      }
-    }
-
-    function checkCombination() {
-      document.querySelectorAll(".powerInput").forEach(el => el.classList.remove("highlight"));
-
-      const target = parseInt(document.getElementById("targetPower").value.replace(/,/g,"")) -
-                     parseInt(document.getElementById("placedPower").value.replace(/,/g,""));
-
-      const inputs = Array.from(document.querySelectorAll(".powerInput"))
-        .map(el => ({ el, value: parseInt(el.value.replace(/,/g,"")) }))
-        .filter(x => !isNaN(x.value)); // NaNは除外、0はOK
-
-      let found = false;
-      let k = (memberCount === 4) ? 4 : 3; // 4人なら必ず4人組み合わせ
-
-      function combine(arr, k, start = 0, combo = []) {
-        if (combo.length === k) {
-          const sum = combo.reduce((a, b) => a + b.value, 0);
-          if (sum === target && !found) {
-            combo.forEach(x => x.el.classList.add("highlight"));
-            const randomSerifu = sawaSerifu[Math.floor(Math.random() * sawaSerifu.length)];
-            document.getElementById("result").textContent = randomSerifu;
-            document.getElementById("result").style.color = "red";
-            found = true;
-          }
-          return;
-        }
-        for (let i = start; i < arr.length; i++) {
-          combine(arr, k, i + 1, combo.concat(arr[i]));
-        }
-      }
-
-      combine(inputs, k);
-
-      if (!found) {
-        document.getElementById("result").textContent = "一致なし";
-        document.getElementById("result").style.color = "white";
-      }
-    }
-  </script>
+renderBushoBlocks();
+</script>
 </body>
 </html>
