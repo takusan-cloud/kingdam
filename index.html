@@ -15,21 +15,19 @@
   html,body{
     margin:0;
     height:100%;
-    font-family:"M PLUS Rounded 1c", "Hiragino Kaku Gothic ProN", "Noto Sans JP", sans-serif;
-    background: url("bg.jpg") no-repeat center top/cover;
+    font-family:"M PLUS Rounded 1c","Hiragino Kaku Gothic ProN","Noto Sans JP",sans-serif;
+    background: url("bg.jpg") no-repeat center top;
+    background-size: cover;
     color:#fff;
     -webkit-font-smoothing:antialiased;
   }
 
-  /* ---- Mobile: hide background image to improve readability and performance ---- */
   @media (max-width: 880px) {
     html,body {
-      background-image: none;
-      background-color: #000; /* fallback background */
-      background-repeat: no-repeat;
-      background-position: center top;
+      background: url("bg.jpg") no-repeat center center fixed;
       background-size: cover;
     }
+    h1 { white-space: pre-line; }
   }
 
   .wrap { max-width:1200px; margin:0 auto; padding:18px; box-sizing:border-box; }
@@ -82,14 +80,20 @@
     color: #000 !important;
   }
 
+  /* 結果を独立スタイルに変更 */
   #result {
-    text-align:center; font-size:18px; font-weight:800; margin-top:14px; text-shadow:2px 2px 5px #000; min-height:28px;
+    text-align:left;
+    margin: 10px 0;
   }
   #result span.serifu {
-    display:inline-block; background: rgba(255,255,255,0.95); color:#c00; padding:8px 12px; border-radius:12px; font-weight:900;
+    display:inline-block;
+    background: rgba(255,255,255,0.95);
+    color:#c00;
+    padding:8px 12px;
+    border-radius:12px;
+    font-weight:900;
+    font-size: 1.2rem;
   }
-  #result.animate span.serifu { animation: popBounce 0.55s cubic-bezier(.2,.9,.2,1); }
-  @keyframes popBounce { 0%{ transform:scale(.7); opacity:0 } 60%{ transform:scale(1.08); opacity:1 } 100%{ transform:scale(1) } }
 
   #saveMsg { position:fixed; right:14px; top:14px; background:rgba(0,0,0,0.8); color:#fff; padding:10px 14px; border-radius:8px; opacity:0; transform:translateY(-8px); transition:opacity .28s, transform .28s; z-index:999; }
   #saveMsg.show { opacity:1; transform:translateY(0); }
@@ -99,12 +103,13 @@
     #members{ justify-content:center; }
     .member{ width:92%; }
     .inputs{ min-width:100%; }
+    #tabInfo img { width:70%; }
   }
 </style>
 </head>
 <body>
   <div class="wrap">
-    <h1>キングダム頂天 数字合わせ</h1>
+    <h1>キングダム頂天\n数字合わせ</h1>
 
     <div class="tabs">
       <button class="tab-btn" id="tabCalcBtn">計算</button>
@@ -130,24 +135,26 @@
         </div>
       </div>
 
-      <div id="members" aria-live="polite"></div>
+      <!-- 独立させた結果表示 -->
+      <div id="result"></div>
 
-      <div id="result"><!-- result shown here --></div>
+      <div id="members" aria-live="polite"></div>
     </div>
 
     <div id="tabInfo" class="panel" style="display:none; margin-top:12px;">
       <h2 style="margin-top:0;">使い方</h2>
-      <p>「表示したい戦力」に目標の戦力を入力します。<br>
-      「配置済みの戦力」に数字合わせで使用しない武将を配置した際の戦力を入力します。（数字合わせで使用するのが３体であれば７体配置した戦力になります。）</p>
-      <p>武将1〜3の戦力を入力します。必要なら「＋武将追加」で武将4も追加可能です。</p>
-      <p>「チェック」を押すと、各武将から1つずつ選ぶ総当たりで目標に一致するものを探します。最初に見つかった1件だけ結果表示します。</p>
-      <p><strong>一致した場合は澤さんの名言（赤文字・吹き出し風）を表示します！</strong></p>
-      <img src="screenshot1.png" alt="入力例" style="width:20%; display:block; margin-top:10px;">
+      <ol>
+        <li>「表示したい戦力」に目標の戦力を入力します。</li>
+        <li>「配置済みの戦力」に数字合わせで使用しない武将を配置した際の戦力を入力します。（数字合わせで使用するのが３体であれば７体配置した戦力になります。）</li>
+        <li>武将1〜3の戦力を入力します。必要なら「＋武将追加」で武将4も追加可能です。</li>
+        <li>「チェック」を押すと、各武将から1つずつ選ぶ総当たりで目標に一致するものを探します。</li>
+        <li><strong>一致した場合は澤さんの名言（赤文字・吹き出し風）を表示します！</strong></li>
+      </ol>
+      <img src="screenshot1.png" alt="入力例" style="display:block; margin:10px auto;">
     </div>
   </div>
 
   <div id="saveMsg">✅ 保存しました</div>
-
 <script>
 (() => {
   // --- 設定データ ---
