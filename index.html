@@ -12,13 +12,24 @@
     --panel-pad: 12px;
   }
 
-  html,body {
+  html,body{
     margin:0;
     height:100%;
     font-family:"M PLUS Rounded 1c", "Hiragino Kaku Gothic ProN", "Noto Sans JP", sans-serif;
     background: url("bg.jpg") no-repeat center top/cover;
     color:#fff;
     -webkit-font-smoothing:antialiased;
+  }
+
+  /* ---- Mobile: hide background image to improve readability and performance ---- */
+  @media (max-width: 880px) {
+    html,body {
+      background-image: none;
+      background-color: #000; /* fallback background */
+      background-repeat: no-repeat;
+      background-position: center top;
+      background-size: cover;
+    }
   }
 
   .wrap { max-width:1200px; margin:0 auto; padding:18px; box-sizing:border-box; }
@@ -41,111 +52,53 @@
   .inputs { display:flex; flex-direction:column; gap:8px; min-width:240px; }
   label { font-weight:700; font-size:14px; color:#fff; display:block; margin-bottom:6px; }
 
-  /* 名前と戦力（透過）を合わせる */
   .text-input, .power-input {
-    display:block;
-    width:100%;
-    box-sizing:border-box;
-    padding:8px;
-    border-radius:6px;
-    border:none;
-    background: rgba(255,255,255,0.10); /* ←透過（名前欄と同じ） */
-    color: #fff;
-    outline: none;
+    display:block; width:100%; box-sizing:border-box; padding:8px; border-radius:6px; border:none;
+    background: rgba(255,255,255,0.10); color:#fff; outline:none;
   }
   .text-input::placeholder, .power-input::placeholder { color: rgba(255,255,255,0.6); }
 
-  /* 上部 target/placed right aligned */
   #targetPower, #placedPower { text-align:right; }
 
   .controls { display:flex; flex-direction:column; gap:8px; }
   .btn { background:#fff; color:#000; border:none; padding:8px 10px; border-radius:6px; cursor:pointer; }
   .small { padding:6px 8px; font-size:14px; }
 
-  /* members area */
   #members { display:flex; flex-wrap:wrap; gap:18px; margin-top:18px; justify-content:flex-start; }
+
   .member {
-    width:240px;
-    background:var(--card-bg);
-    padding:12px;
-    border-radius:10px;
-    box-sizing:border-box;
-    display:flex;
-    flex-direction:column;
+    width:240px; background:var(--card-bg); padding:12px; border-radius:10px; box-sizing:border-box; display:flex; flex-direction:column;
   }
   .member h3 { margin:4px 0 8px; text-align:center; font-size:16px; }
+  .member .name { margin-bottom:6px; }
+  .member .name input { width:100%; box-sizing:border-box; padding:8px; border-radius:6px; border:none; background: rgba(255,255,255,0.10); color:#fff; }
 
-  /* powers: 2 columns x 5 rows = 10 inputs */
-  .powers {
-    display:grid;
-    grid-template-columns: 1fr 1fr;
-    gap:8px;
-    width:100%;
-    box-sizing:border-box;
-  }
-  .powers input {
-    width:100%;
-    box-sizing:border-box;
-    padding:8px;
-    border-radius:6px;
-    border:none;
-    background: rgba(255,255,255,0.10); /* ←同じ透過 */
-    color:#fff;
-    text-align:right;
-  }
-  .powers input::placeholder { color: rgba(255,255,255,0.6); }
+  .powers { display:grid; grid-template-columns:1fr 1fr; gap:8px; width:100%; box-sizing:border-box; }
+  .powers input { width:100%; box-sizing:border-box; padding:8px; border-radius:6px; border:none; background: rgba(255,255,255,0.10); color:#fff; text-align:right; }
 
-  /* highlight (semi-transparent so numbers remain visible) */
   .highlight {
     background: rgba(255,255,0,0.35) !important;
     outline: 3px solid rgba(255,0,0,0.9) !important;
     color: #000 !important;
   }
 
-  /* result / serifu */
   #result {
-    text-align:center;
-    font-size:18px;
-    font-weight:800;
-    margin-top:14px;
-    text-shadow:2px 2px 5px #000;
-    min-height:28px;
+    text-align:center; font-size:18px; font-weight:800; margin-top:14px; text-shadow:2px 2px 5px #000; min-height:28px;
   }
   #result span.serifu {
-    display:inline-block;
-    background: rgba(255,255,255,0.95);
-    color: #c00;
-    padding:8px 12px;
-    border-radius:12px;
-    font-weight:900;
-    box-shadow:0 4px 10px rgba(0,0,0,0.4);
-    transform-origin:center;
+    display:inline-block; background: rgba(255,255,255,0.95); color:#c00; padding:8px 12px; border-radius:12px; font-weight:900;
   }
-  /* serifu animation */
-  #result.animate span.serifu {
-    animation: popBounce 0.55s cubic-bezier(.2,.9,.2,1);
-  }
-  @keyframes popBounce {
-    0% { transform: scale(.7); opacity:0; }
-    60% { transform: scale(1.08); opacity:1; }
-    100% { transform: scale(1); }
-  }
+  #result.animate span.serifu { animation: popBounce 0.55s cubic-bezier(.2,.9,.2,1); }
+  @keyframes popBounce { 0%{ transform:scale(.7); opacity:0 } 60%{ transform:scale(1.08); opacity:1 } 100%{ transform:scale(1) } }
 
-  /* save toast */
-  #saveMsg {
-    position:fixed; right:14px; top:14px;
-    background:rgba(0,0,0,0.8); color:#fff;
-    padding:10px 14px; border-radius:8px;
-    opacity:0; transform:translateY(-8px);
-    transition:opacity .28s, transform .28s; z-index:999;
-  }
+  #saveMsg { position:fixed; right:14px; top:14px; background:rgba(0,0,0,0.8); color:#fff; padding:10px 14px; border-radius:8px; opacity:0; transform:translateY(-8px); transition:opacity .28s, transform .28s; z-index:999; }
   #saveMsg.show { opacity:1; transform:translateY(0); }
 
-  @media (max-width:880px) {
-    .wrap { padding:12px; }
-    #members { justify-content:center; }
-    .member { width:92%; }
-    .inputs { min-width:100%; }
+  @media (max-width:880px){
+    .wrap{ padding:12px; }
+    #members{ justify-content:center; }
+    .member{ width:92%; }
+    .inputs{ min-width:100%; }
   }
 </style>
 </head>
@@ -158,7 +111,6 @@
       <button class="tab-btn" id="tabInfoBtn">説明</button>
     </div>
 
-    <!-- 計算タブ -->
     <div id="tabCalc">
       <div class="topbar">
         <div class="panel inputs">
@@ -180,15 +132,14 @@
 
       <div id="members" aria-live="polite"></div>
 
-      <div id="result"><!-- 一致結果 --></div>
+      <div id="result"><!-- result shown here --></div>
     </div>
 
-    <!-- 説明タブ -->
     <div id="tabInfo" class="panel" style="display:none; margin-top:12px;">
       <h2 style="margin-top:0;">使い方</h2>
       <p>「表示したい戦力」に目標の戦力を入力します。<br>
       「配置済みの戦力」に数字合わせで使用しない武将を配置した際の戦力を入力します。（数字合わせで使用するのが３体であれば７体配置した戦力になります。）</p>
-      <p>武将1〜3の戦力を入力します。副将で数字合わせする場合は実際に配置した戦力を入力してください。必要なら「＋武将追加」で武将4も追加可能です。</p>
+      <p>武将1〜3の戦力を入力します。必要なら「＋武将追加」で武将4も追加可能です。</p>
       <p>「チェック」を押すと、各武将から1つずつ選ぶ総当たりで目標に一致するものを探します。最初に見つかった1件だけ結果表示します。</p>
       <p><strong>一致した場合は澤さんの名言（赤文字・吹き出し風）を表示します！</strong></p>
       <img src="screenshot1.png" alt="入力例" style="width:20%; display:block; margin-top:10px;">
@@ -262,9 +213,7 @@
         ${Array.from({length:10}).map((_,i)=>`<input class="power-input" placeholder="戦力" value="${data && data.powers && data.powers[i] ? escapeHtml(data.powers[i]) : ''}">`).join('')}
       </div>
     `;
-    // apply behaviors to newly created power inputs
     wrapper.querySelectorAll('.power-input').forEach(inp => setupNumberFieldBehavior(inp));
-    wrapper.querySelectorAll('.name').forEach(n=>{ /* no special behavior */ });
     return wrapper;
   }
   function escapeHtml(s){ return String(s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;'); }
@@ -291,7 +240,6 @@
       const data = saved[i] || { name:'', powers:Array(10).fill('') };
       membersEl.appendChild(makeMemberElement(i+1, data));
     }
-    // toggle add/remove button
     addBtn.style.display = memberCount >= MAX_MEMBERS ? 'none' : 'inline-block';
     removeBtn.style.display = memberCount > 3 ? 'inline-block' : 'none';
   }
@@ -300,7 +248,6 @@
   function saveAll(){
     const data = captureCurrentData();
     localStorage.setItem('kingdom_full_v1', JSON.stringify(data));
-    // toast
     saveMsg.classList.add('show');
     setTimeout(()=>saveMsg.classList.remove('show'), 1200);
   }
@@ -314,7 +261,6 @@
       targetEl.value = obj.target || '';
       placedEl.value = obj.placed || '';
       renderMembers(obj);
-      // format top fields if needed
       [targetEl, placedEl].forEach(el => { el.value = formatWithCommasRaw(el.value); setupNumberFieldBehavior(el); });
     }catch(e){
       console.warn('load failed', e);
@@ -324,10 +270,7 @@
 
   // --- 一致判定（再帰で汎用対応：memberCount に応じて） ---
   function checkMatch(){
-    // reset highlights
     document.querySelectorAll('.power-input').forEach(i => i.classList.remove('highlight'));
-
-    // parse target/placed
     const targetNum = toNumber(targetEl.value);
     const placedNum = toNumber(placedEl.value);
     if(isNaN(targetNum)){
@@ -336,15 +279,13 @@
     }
     const needed = targetNum - (isNaN(placedNum) ? 0 : placedNum);
 
-    // collect candidates: for each member, list of {el, value}
     const memberNodes = Array.from(membersEl.querySelectorAll('.member'));
     const candidates = memberNodes.map((mdiv)=>{
       return Array.from(mdiv.querySelectorAll('.power-input'))
         .map((el, idx) => ({ el, val: toNumber(el.value), idx }))
-        .filter(o => !isNaN(o.val)); // keep only numeric entries
+        .filter(o => !isNaN(o.val));
     });
 
-    // require at least one numeric per member
     for(let i=0;i<candidates.length;i++){
       if(candidates[i].length === 0){
         alert(`武将${i+1}に少なくとも1つは数字（戦力）を入力してください`);
@@ -352,13 +293,12 @@
       }
     }
 
-    // recursive search for first matching combination
-    let found = null; // will store array of chosen objects {el, val, idx}
+    let found = null;
     function dfs(memberIndex, sumSoFar, path){
-      if(found) return; // already found
+      if(found) return;
       if(memberIndex === candidates.length){
         if(sumSoFar === needed){
-          found = path.slice(); // copy
+          found = path.slice();
         }
         return;
       }
@@ -374,14 +314,9 @@
     dfs(0, 0, []);
 
     if(found){
-      // highlight the matched inputs (unique by element)
-      found.forEach(obj => {
-        obj.el.classList.add('highlight');
-      });
-      // show serifu (赤文字、吹き出し風)
+      found.forEach(obj => obj.el.classList.add('highlight'));
       const quote = SAWA_SERIFU[Math.floor(Math.random()*SAWA_SERIFU.length)];
       resultEl.innerHTML = `<span class="serifu">${escapeHtml(quote)}</span>`;
-      // animate
       void resultEl.offsetWidth;
       resultEl.classList.add('animate');
       setTimeout(()=> resultEl.classList.remove('animate'), 700);
@@ -391,10 +326,8 @@
   }
 
   // --- 初期化 / イベント接続 ---
-  // wire top input behaviors (format on blur)
   [targetEl, placedEl].forEach(el => setupNumberFieldBehavior(el));
 
-  // add/remove preserving data
   addBtn.addEventListener('click', ()=>{
     const cur = captureCurrentData();
     if(memberCount < MAX_MEMBERS){
@@ -406,17 +339,14 @@
     const cur = captureCurrentData();
     if(memberCount > 3){
       memberCount--;
-      // trim preserved members
       cur.members = (cur.members || []).slice(0, memberCount);
       renderMembers(cur);
     }
   });
 
-  // check/save etc
   checkBtn.addEventListener('click', checkMatch);
   saveBtn.addEventListener('click', saveAll);
 
-  // tab switching
   tabCalcBtn.addEventListener('click', ()=>{ tabCalc.style.display='block'; tabInfo.style.display='none'; });
   tabInfoBtn.addEventListener('click', ()=>{ tabCalc.style.display='none'; tabInfo.style.display='block'; });
 
