@@ -143,7 +143,7 @@
       <ol>
         <li>「表示したい戦力」に目標の戦力を入力します。</li>
         <li>「配置済みの戦力」に数字合わせで使用しない武将を配置した際の戦力を入力します。（数字合わせで使用するのが３体であれば７体配置した戦力になります。）</li>
-        <li>武将1〜3の戦力を入力します。１０か所全部埋める必要はありません。「＋武将追加」で武将4や武将5も追加可能です。</li>
+        <li>武将1〜3の戦力を入力します。「＋武将追加」で武将4〜10も追加可能です。</li>
         <li>「チェック」を押すと、各武将から1つずつ選ぶ総当たりで目標に一致するものを探します。</li>
         <li><strong>一致した場合は澤さんの名言が表示されます！！</strong></li>
       </ol>
@@ -160,7 +160,7 @@
     "弱者には弱者の戦い方があります",
     "これは卑怯ではなく戦法です"
   ];
-  const MAX_MEMBERS = 5;
+  const MAX_MEMBERS = 10; // ← 10人まで対応
   let memberCount = 3;
 
   const membersEl = document.getElementById('members');
@@ -290,6 +290,7 @@
     let found = null;
     function dfs(memberIndex, sumSoFar, path){
       if(found) return;
+      if(sumSoFar > needed) return; // 枝刈り：必要値を超えたら探索打ち切り
       if(memberIndex === candidates.length){
         if(sumSoFar === needed){
           found = path.slice();
