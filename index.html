@@ -80,7 +80,6 @@
     color: #000 !important;
   }
 
-  /* 結果を独立スタイルに変更 */
   #result {
     text-align:left;
     margin: 10px 0;
@@ -120,24 +119,22 @@
       <div class="topbar">
         <div class="panel inputs">
           <label for="targetPower">表示したい戦力</label>
-          <input id="targetPower" class="text-input" type="text" placeholder="400,000,000">
+          <input id="targetPower" class="text-input" type="text" placeholder="40,000,000">
           <label for="placedPower">配置済みの戦力</label>
-          <input id="placedPower" class="text-input" type="text" placeholder="300,000,000">
+          <input id="placedPower" class="text-input" type="text" placeholder="30,000,000">
         </div>
 
         <div class="panel controls">
           <button id="checkBtn" class="btn">チェック</button>
           <div style="display:flex; gap:8px;">
             <button id="addBtn" class="btn small">＋武将追加</button>
-            <button id="removeBtn" class="btn small" style="display:none;">−武将削除</button>
+            <button id="removeBtn" class="btn small">−武将削除</button>
           </div>
           <button id="saveBtn" class="btn">💾 データ保存</button>
         </div>
       </div>
 
-      <!-- 独立させた結果表示 -->
       <div id="result"></div>
-
       <div id="members" aria-live="polite"></div>
     </div>
 
@@ -146,7 +143,7 @@
       <ol>
         <li>「表示したい戦力」に目標の戦力を入力します。</li>
         <li>「配置済みの戦力」に数字合わせで使用しない武将を配置した際の戦力を入力します。（数字合わせで使用するのが３体であれば７体配置した戦力になります。）</li>
-        <li>武将1〜3の戦力を入力します。１０か所全部埋める必要はありません。「＋武将追加」で武将4も追加可能です。</li>
+        <li>武将1〜3の戦力を入力します。１０か所全部埋める必要はありません。「＋武将追加」で武将4や武将5も追加可能です。</li>
         <li>「チェック」を押すと、各武将から1つずつ選ぶ総当たりで目標に一致するものを探します。</li>
         <li><strong>一致した場合は澤さんの名言が表示されます！！</strong></li>
       </ol>
@@ -155,18 +152,17 @@
   </div>
 
   <div id="saveMsg">✅ 保存しました</div>
+
 <script>
 (() => {
-  // --- 設定データ ---
   const SAWA_SERIFU = [
     "私の伍は今まで一人も死んでいません",
     "弱者には弱者の戦い方があります",
     "これは卑怯ではなく戦法です"
   ];
-  const MAX_MEMBERS = 4;
-  let memberCount = 3; // 初期は3名
+  const MAX_MEMBERS = 5;
+  let memberCount = 3;
 
-  // --- 要素参照 ---
   const membersEl = document.getElementById('members');
   const targetEl = document.getElementById('targetPower');
   const placedEl = document.getElementById('placedPower');
@@ -181,7 +177,6 @@
   const tabCalc = document.getElementById('tabCalc');
   const tabInfo = document.getElementById('tabInfo');
 
-  // --- ユーティリティ ---
   function toNumber(str){
     if(str === undefined || str === null) return NaN;
     const s = String(str).replace(/,/g,'').replace(/[^\d.-]/g,'');
@@ -194,7 +189,6 @@
     return Number(n).toLocaleString();
   }
 
-  // --- 入力フィールドの振る舞い（フォーカスで編集、ブラーで整形） ---
   function setupNumberFieldBehavior(el){
     el.addEventListener('focus', () => {
       el.value = (el.value||'').replace(/,/g,'').replace(/[^\d]/g,'');
@@ -202,14 +196,9 @@
     el.addEventListener('blur', () => {
       el.value = formatWithCommasRaw(el.value);
     });
-    el.addEventListener('paste', () => {
-      setTimeout(()=>{ el.value = (el.value||'').replace(/[^\d]/g,''); }, 0);
-    });
   }
 
-  // --- メンバー DOM 管理 ---
   function makeMemberElement(index, data){
-    // data = {name: string, powers: [string*10] }
     const wrapper = document.createElement('div');
     wrapper.className = 'member';
     wrapper.dataset.index = index;
@@ -247,11 +236,10 @@
       const data = saved[i] || { name:'', powers:Array(10).fill('') };
       membersEl.appendChild(makeMemberElement(i+1, data));
     }
-    addBtn.style.display = memberCount >= MAX_MEMBERS ? 'none' : 'inline-block';
-    removeBtn.style.display = memberCount > 3 ? 'inline-block' : 'none';
+    addBtn.disabled = memberCount >= MAX_MEMBERS;
+    removeBtn.disabled = memberCount <= 3;
   }
 
-  // --- 保存 / 読み込み ---
   function saveAll(){
     const data = captureCurrentData();
     localStorage.setItem('kingdom_full_v1', JSON.stringify(data));
@@ -275,7 +263,6 @@
     }
   }
 
-  // --- 一致判定（再帰で汎用対応：memberCount に応じて） ---
   function checkMatch(){
     document.querySelectorAll('.power-input').forEach(i => i.classList.remove('highlight'));
     const targetNum = toNumber(targetEl.value);
@@ -324,15 +311,11 @@
       found.forEach(obj => obj.el.classList.add('highlight'));
       const quote = SAWA_SERIFU[Math.floor(Math.random()*SAWA_SERIFU.length)];
       resultEl.innerHTML = `<span class="serifu">${escapeHtml(quote)}</span>`;
-      void resultEl.offsetWidth;
-      resultEl.classList.add('animate');
-      setTimeout(()=> resultEl.classList.remove('animate'), 700);
     } else {
       resultEl.textContent = '一致なし';
     }
   }
 
-  // --- 初期化 / イベント接続 ---
   [targetEl, placedEl].forEach(el => setupNumberFieldBehavior(el));
 
   addBtn.addEventListener('click', ()=>{
@@ -357,7 +340,6 @@
   tabCalcBtn.addEventListener('click', ()=>{ tabCalc.style.display='block'; tabInfo.style.display='none'; });
   tabInfoBtn.addEventListener('click', ()=>{ tabCalc.style.display='none'; tabInfo.style.display='block'; });
 
-  // render initial members and load saved data (if any)
   renderMembers();
   loadAll();
 })();
