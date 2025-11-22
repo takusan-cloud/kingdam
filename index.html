@@ -4,16 +4,6 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
 <title>キングダム頂天 数字合わせ</title>
-
-<!-- Google tag (gtag.js) -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-XXXXXXXXXX"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
-  gtag('config', 'G-FR9TXFWHPD');
-</script>
-  
 <style>
   @import url('https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@700&display=swap');
 
@@ -22,32 +12,67 @@
     --panel-pad: 12px;
   }
 
-  html,body{
+  html,body {
     margin:0;
     height:100%;
     font-family:"M PLUS Rounded 1c","Hiragino Kaku Gothic ProN","Noto Sans JP",sans-serif;
-    background: url("bg.jpg") no-repeat center top;
-    background-size: cover;
     color:#fff;
     -webkit-font-smoothing:antialiased;
   }
 
-  @media (max-width: 880px) {
-    html,body {
-      background: url("bg.jpg") no-repeat center center fixed;
-      background-size: cover;
-    }
-    h1 { white-space: pre-line; }
+  /* 背景レイヤー */
+  #bgLayer {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: url("bg_sawa.jpg") no-repeat center top;
+    background-size: cover; /* ←スマホでは今まで通りカバー表示 */
+    z-index: -1;
+    transition: background-image 0.3s ease-in-out;
   }
 
+  /* PC版だけ高さ基準表示に切り替え（上を切らない） */
+  @media (min-width: 881px) {
+  #bgLayer {
+    background-position: center top;
+    background-size: auto 200%; /* ← 横幅を10%拡大 */
+  }
+}
+
   .wrap { max-width:1200px; margin:0 auto; padding:18px; box-sizing:border-box; }
+
+  .character-select {
+    position:absolute;
+    top:10px;
+    left:10px;
+    background:rgba(0,0,0,0.6);
+    padding:4px 8px;
+    border-radius:6px;
+  }
+  .character-select select {
+    background: rgba(0,0,0,0.7);
+    color:#fff;
+    font-weight:bold;
+    border:none;
+    outline:none;
+    border-radius: 4px;
+    padding: 4px 6px;
+  }
 
   h1 {
     text-align:center;
     font-size:32px;
-    margin:8px 0 14px;
+    margin:8px 0 6px;
     color:#ff1a1a;
     text-shadow:2px 2px 4px #000;
+  }
+
+  #currentCharacterLabel {
+    text-align:center;
+    font-weight:bold;
+    margin-bottom:12px;
+    font-size:16px;
+    color:#fff;
+    text-shadow:1px 1px 2px #000;
   }
 
   .tabs { display:flex; justify-content:center; gap:8px; margin-bottom:12px; }
@@ -65,7 +90,6 @@
     background: rgba(255,255,255,0.10); color:#fff; outline:none;
   }
   .text-input::placeholder, .power-input::placeholder { color: rgba(255,255,255,0.6); }
-
   #targetPower, #placedPower { text-align:right; }
 
   .controls { display:flex; flex-direction:column; gap:8px; }
@@ -117,8 +141,19 @@
 </style>
 </head>
 <body>
+  <div id="bgLayer"></div>
+
+  <!-- 推しキャラ選択 -->
+  <div class="character-select">
+    <select id="characterSelect">
+      <option value="sawa">澤</option>
+      <option value="monten">蒙恬</option>
+    </select>
+  </div>
+
   <div class="wrap">
     <h1>キングダム頂天<br>数字合わせ</h1>
+    <div id="currentCharacterLabel">推しキャラ：澤</div>
 
     <div class="tabs">
       <button class="tab-btn" id="tabCalcBtn">計算</button>
@@ -154,11 +189,9 @@
         <li>「表示したい戦力」に目標の戦力を入力します。</li>
         <li>「配置済みの戦力」に数字合わせで使用しない武将を配置した際の戦力を入力します。</li>
         <li>武将1〜3の戦力を入力。「＋武将追加」で武将4〜10も追加可能です。</li>
-        <li>副将で数字合わせする場合は配置した時の戦力を転記してください。（なぜか２分の１にならないため・・・）</li>
         <li>「チェック」を押すと、各武将から1つずつ選ぶ総当たりで目標に一致するものを探します。</li>
-        <li><strong>一致した場合は澤さんの名言が表示されます！！</strong></li>
+        <li><strong>一致した場合はキャラごとのセリフが表示されます！！</strong></li>
       </ol>
-      <img src="screenshot1.png" alt="入力例" style="display:block; margin:10px auto;">
     </div>
   </div>
 
@@ -166,16 +199,50 @@
 
 <script>
 (() => {
-  const SAWA_SERIFU = [
-    "私の伍は今まで一人も死んでいません",
-    "弱者には弱者の戦い方があります",
-    "これは卑怯ではなく戦法です",
-    "五身一体。私たちは”伍の結束”で生き残りましょう",
-    "うおおおおおお！！！"
-  ];
+  const CHARACTERS = {
+    sawa: {
+      background: "bg_sawa.jpg",
+      serif: [
+        "私の伍は今まで一人も死んでいません",
+        "弱者には弱者の戦い方があります",
+        "これは卑怯ではなく戦法です",
+        "五身一体。私たちは”伍の結束”で生き残りましょう",
+        "うおおおおおお！！！"
+      ]
+    },
+    monten: {
+      background: "bg_monten.jpg",
+      serif: [
+        "楽華隊！！",
+        "無茶はよせよ　俺の子を抱くまでは死ねないんだろ",
+        "もっと気楽に行こーよ　先は長いんだし",
+        "悪いが宜しく頼むよ　みんな",
+        "ありがとう　じーちゃん"
+      ]
+    }
+  };
+
+  const bgLayer = document.getElementById("bgLayer");
+  const charLabel = document.getElementById("currentCharacterLabel");
+  const selectEl = document.getElementById("characterSelect");
+
+  let currentChar = localStorage.getItem('kingdom_character') || 'sawa';
+  let currentSerifList = CHARACTERS[currentChar].serif;
+
+  selectEl.value = currentChar;
+  bgLayer.style.backgroundImage = `url(${CHARACTERS[currentChar].background})`;
+  charLabel.textContent = `推しキャラ：${currentChar === "sawa" ? "澤" : "蒙恬"}`;
+
+  selectEl.addEventListener("change", e => {
+    currentChar = e.target.value;
+    currentSerifList = CHARACTERS[currentChar].serif;
+    bgLayer.style.backgroundImage = `url(${CHARACTERS[currentChar].background})`;
+    charLabel.textContent = `推しキャラ：${currentChar === "sawa" ? "澤" : "蒙恬"}`;
+    localStorage.setItem('kingdom_character', currentChar);
+  });
+
   const MAX_MEMBERS = 10;
   let memberCount = 3;
-
   const membersEl = document.getElementById('members');
   const targetEl = document.getElementById('targetPower');
   const placedEl = document.getElementById('placedPower');
@@ -185,10 +252,6 @@
   const saveBtn = document.getElementById('saveBtn');
   const resultEl = document.getElementById('result');
   const saveMsg = document.getElementById('saveMsg');
-  const tabCalcBtn = document.getElementById('tabCalcBtn');
-  const tabInfoBtn = document.getElementById('tabInfoBtn');
-  const tabCalc = document.getElementById('tabCalc');
-  const tabInfo = document.getElementById('tabInfo');
 
   function toNumber(str){
     if(str === undefined || str === null) return NaN;
@@ -303,7 +366,7 @@
     let found = null;
     function dfs(memberIndex, sumSoFar, path){
       if(found) return;
-      if(sumSoFar > needed) return; // 枝刈り
+      if(sumSoFar > needed) return;
       if(memberIndex === candidates.length){
         if(sumSoFar === needed){
           found = path.slice();
@@ -323,7 +386,7 @@
 
     if(found){
       found.forEach(obj => obj.el.classList.add('highlight'));
-      const quote = SAWA_SERIFU[Math.floor(Math.random()*SAWA_SERIFU.length)];
+      const quote = currentSerifList[Math.floor(Math.random()*currentSerifList.length)];
       resultEl.innerHTML = `<span class="serifu">${escapeHtml(quote)}</span>`;
     } else {
       resultEl.textContent = '一致なし';
@@ -351,15 +414,9 @@
   checkBtn.addEventListener('click', checkMatch);
   saveBtn.addEventListener('click', saveAll);
 
-  tabCalcBtn.addEventListener('click', ()=>{ tabCalc.style.display='block'; tabInfo.style.display='none'; });
-  tabInfoBtn.addEventListener('click', ()=>{ tabCalc.style.display='none'; tabInfo.style.display='block'; });
-
   renderMembers();
   loadAll();
 })();
 </script>
 </body>
 </html>
-
-
-
